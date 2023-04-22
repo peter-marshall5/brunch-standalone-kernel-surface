@@ -12,9 +12,6 @@ kernels=6.2.12
 
 mkdir -p rootc/packages
 
-touch rootc/linux-test
-exit
-
 for kernel in $kernels; do
 	echo "Building kernel $kernel"
 	KCONFIG_NOTIMESTAMP=1 KBUILD_BUILD_TIMESTAMP='' KBUILD_BUILD_USER=chronos KBUILD_BUILD_HOST=localhost make -C "./kernels/$kernel" -j"$NTHREADS" O=out || { echo "Kernel build failed"; exit 1; }
