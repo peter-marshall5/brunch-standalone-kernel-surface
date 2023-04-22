@@ -23,5 +23,5 @@ for kernel in $kernels; do
 	#fi
 	cp "./kernels/$kernel/out/arch/x86/boot/bzImage" "./rootc/kernel-$kernel"
 	make -C "./kernels/$kernel" -j"$NTHREADS" O=out INSTALL_MOD_STRIP=1 INSTALL_MOD_PATH="./kmods" modules_install
-	tar zcf rootc/packages/kernel-"$kernel".tar.gz -C "./kernels/$kernel/out/kmods/" . --owner=0 --group=0
+	tar zcf rootc/packages/kernel-"$kernel"-brunch-sebanc.tar.gz -C "./kernels/$kernel/out/kmods/" . --owner=0 --group=0
 done
