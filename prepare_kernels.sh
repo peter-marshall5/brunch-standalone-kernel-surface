@@ -18,7 +18,7 @@ make_config()
 {
 mkdir kernels/$1/out
 cp config-$1 kernels/$1/out/.config
-make -C "./kernels/$1" O=out nconfig
+#make -C "./kernels/$1" O=out nconfig
 }
 
 download_and_patch_kernels()
