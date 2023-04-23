@@ -118,7 +118,7 @@ diff -ruN a/drivers/md/dm-verity-target.c b/drivers/md/dm-verity-target.c
 +			 blk_status_t status)
 +{
 +	const char *message = v->hash_failed ? "integrity" : "block";
-+	int error_behavior = DM_VERITY_ERROR_BEHAVIOR_PANIC;
++	int error_behavior = DM_VERITY_ERROR_BEHAVIOR_NONE;
 +	dev_t devt = 0;
 +	u64 block = ~0;
 +	struct dm_verity_error_state error_state;
@@ -126,7 +126,7 @@ diff -ruN a/drivers/md/dm-verity-target.c b/drivers/md/dm-verity-target.c
 +	int transient = !v->hash_failed;
 +
 +	devt = v->data_dev->bdev->bd_dev;
-+	error_behavior = v->error_behavior;
++	/* error_behavior = v->error_behavior; */
 +	if (io)
 +		block = io->block;
 +
