@@ -48,48 +48,6 @@ diff -ruN a/include/linux/low-mem-notify.h b/include/linux/low-mem-notify.h
 diff -ruN a/mm/Kconfig b/mm/Kconfig
 --- a/mm/Kconfig	2023-01-24 07:24:44.000000000 +0100
 +++ b/mm/Kconfig	2023-01-30 08:33:15.000000000 +0100
-@@ -590,6 +590,17 @@
- 	  those pages to another entity, such as a hypervisor, so that the
- 	  memory can be freed within the host for other uses.
- 
-+config PROCESS_RECLAIM
-+	bool "Enable process reclaim"
-+	depends on PROC_FS && MMU
-+	help
-+	 It allows to reclaim pages of the process by /proc/pid/reclaim.
-+
-+	 (echo file > /proc/PID/reclaim) reclaims file-backed pages only.
-+	 (echo anon > /proc/PID/reclaim) reclaims anonymous pages only.
-+	 (echo all > /proc/PID/reclaim) reclaims all pages.
-+
-+	 Any other value is ignored.
- #
- # support for page migration
- #
-@@ -678,6 +689,23 @@
- 	  This value can be changed after boot using the
- 	  /proc/sys/vm/mmap_min_addr tunable.
- 
-+config MMAP_NOEXEC_TAINT
-+	int "Turns on tainting of mmap()d files from noexec mountpoints"
-+	default 1 if MMU
-+	default 0 if !MMU
-+	help
-+	  By default, the ability to change the protections of a virtual
-+	  memory area to allow execution depend on if the vma has the
-+	  VM_MAYEXEC flag.  When mapping regions from files, VM_MAYEXEC
-+	  will be unset if the containing mountpoint is mounted MNT_NOEXEC.
-+	  By setting the value to 0, any mmap()d region may be later
-+	  mprotect()d with PROT_EXEC.
-+
-+	  If unsure, keep the value set to 1.
-+
-+	  This value can be changed after boot using the
-+	  /proc/sys/vm/mmap_noexec_taint tunable.
-+
- config ARCH_SUPPORTS_MEMORY_FAILURE
- 	bool
- 
 @@ -1150,6 +1178,17 @@
  	  This option has a per-memcg and per-node memory overhead.
  # }
@@ -523,19 +481,6 @@ diff -ruN a/mm/Makefile b/mm/Makefile
  obj-$(CONFIG_DEBUG_PAGE_REF) += debug_page_ref.o
  obj-$(CONFIG_DAMON) += damon/
  obj-$(CONFIG_HARDENED_USERCOPY) += usercopy.o
-diff -ruN a/mm/mmap.c b/mm/mmap.c
---- a/mm/mmap.c	2023-01-24 07:24:44.000000000 +0100
-+++ b/mm/mmap.c	2023-01-30 08:33:16.000000000 +0100
-@@ -1360,7 +1360,8 @@
- 			if (path_noexec(&file->f_path)) {
- 				if (vm_flags & VM_EXEC)
- 					return -EPERM;
--				vm_flags &= ~VM_MAYEXEC;
-+				if (sysctl_mmap_noexec_taint)
-+					vm_flags &= ~VM_MAYEXEC;
- 			}
- 
- 			if (!file->f_op->mmap)
 diff -ruN a/mm/page_alloc.c b/mm/page_alloc.c
 --- a/mm/page_alloc.c	2023-01-24 07:24:44.000000000 +0100
 +++ b/mm/page_alloc.c	2023-01-30 08:33:16.000000000 +0100
