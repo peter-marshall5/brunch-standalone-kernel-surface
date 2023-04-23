@@ -223,7 +223,7 @@ diff -ruN a/drivers/md/dm-verity-target.c b/drivers/md/dm-verity-target.c
 +				ti->error = "Bad error behavior parameter";
 +				return -EINVAL;
 +			}
-+			v->error_behavior = behavior;
++			/* v->error_behavior = behavior; */
 +			argc--;
 +			continue;
 +
